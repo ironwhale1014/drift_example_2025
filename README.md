@@ -1,16 +1,7 @@
 # my_drift_train
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 1 드리프트로 CRUD 구현
+### 1-1 패키지 설치
+### 1-2 database_config 설정
+### 1-3 메모테이블 생성 
+- 메모테이블 생성 후 config에 메모 테이블을 입력하면 코드 제너레이션을 이용해 필요한 것들이 생성됨
