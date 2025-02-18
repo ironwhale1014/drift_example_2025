@@ -41,6 +41,11 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
                 itemBuilder: (BuildContext context, int index) {
                   Memo memo = state[index];
                   return InkWell(
+                    onTap: () {
+                      ref
+                          .read(memoServiceProvider.notifier)
+                          .update(id: memo.id, title: "update");
+                    },
                     onDoubleTap: () {
                       ref
                           .read(memoServiceProvider.notifier)

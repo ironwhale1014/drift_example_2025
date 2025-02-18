@@ -28,7 +28,14 @@ class MemoService extends _$MemoService {
     if (findMemo == null) {
       throw Exception('not exist Memo');
     }
-    return findMemo.copyWith(title: title, content: content);
+
+    final updatedMemo = findMemo.copyWith(title: title, content: content);
+    final pState = state;
+    state = pState.map((memo) => memo.id == id ? updatedMemo : memo).toList();
+
+    await _memoRepository.update(id: id, memo: updatedMemo);
+
+    return updatedMemo;
   }
 
   // Create
