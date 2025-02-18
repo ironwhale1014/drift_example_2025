@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_drift_train/memo/repository/memo_repository.dart';
+import 'package:my_drift_train/memo/service/memo_service.dart';
 
 import 'common/logger.dart';
-import 'database/database_connector.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +45,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     });
 
     final memoRepository = ref.read(memoRepositoryProvider);
+    final memoService = ref.read(memoServiceProvider);
 
     final create = await memoRepository.create(
       title: 'todo: finish drift setup!!',
@@ -52,6 +53,20 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     );
 
     logger.d(create);
+    try {
+      await memoService.update(id: 100, title: 'test');
+    } catch (e) {
+      logger.e(e);
+
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text('에러발생', textAlign: TextAlign.center),
+              content: Text(e.toString(), textAlign: TextAlign.center),
+            ),
+      );
+    }
   }
 
   @override

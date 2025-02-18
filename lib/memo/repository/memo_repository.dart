@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'memo_repository.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 MemoRepository memoRepository(Ref ref) {
   final dataBaseConnector = ref.read(databaseConnectorProvider);
 
@@ -16,12 +16,34 @@ class MemoRepository {
 
   final DataBaseConnector dataBaseConnector;
 
-  Future<Memo> create({required title, required content}) async {
+  Future<Memo> create({required String title, required String content}) async {
     final id = await dataBaseConnector
         .into(dataBaseConnector.memos)
         .insert(MemosCompanion.insert(title: title, content: content));
 
     return (dataBaseConnector.select(dataBaseConnector.memos)
       ..where((tbl) => tbl.id.equals(id))).getSingle();
+  }
+
+  Future<List<Memo>> findAll() async {
+    return (dataBaseConnector.select(dataBaseConnector.memos)).get();
+  }
+
+  Future<int> delete({required int id}) async {
+    return (dataBaseConnector.delete(dataBaseConnector.memos)
+      ..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  Future<Memo> update({required int id, required Memo memo}) {
+    (dataBaseConnector.update(dataBaseConnector.memos)
+      ..where((tbl) => tbl.id.equals(id))).write(memo);
+
+    return (dataBaseConnector.select(dataBaseConnector.memos)
+      ..where((tbl) => tbl.id.equals(id))).getSingle();
+  }
+
+  Future<Memo?> findById({required int id}) async {
+    return (dataBaseConnector.select(dataBaseConnector.memos)
+      ..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 }
