@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_drift_train/database/database_connector.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,8 +26,15 @@ class MemoRepository {
       ..where((tbl) => tbl.id.equals(id))).getSingle();
   }
 
-  Future<List<Memo>> findAll() async {
-    return (dataBaseConnector.select(dataBaseConnector.memos)).get();
+  Future<List<Memo>> findAll({int? id, int take = 10}) async {
+    final query = dataBaseConnector.select(dataBaseConnector.memos);
+    if (id != null) {
+      query.where((memo) => memo.id.isBiggerThanValue(id));
+    }
+
+    query.limit(take);
+
+    return query.get();
   }
 
   Future<int> delete({required int id}) async {

@@ -1,3 +1,4 @@
+import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
 import 'package:my_drift_train/common/logger.dart';
 import 'package:my_drift_train/memo/repository/memo_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -11,46 +12,72 @@ class MemoService extends _$MemoService {
   late final MemoRepository _memoRepository;
 
   @override
-  List<Memo> build() {
+  CursorPaginationBase build() {
     _memoRepository = ref.read(memoRepositoryProvider);
-    return [];
+    return CursorPaginationLoading();
   }
 
   // Read
-  Future<List<Memo>> paginate() async {
-    state = await _memoRepository.findAll();
-    return _memoRepository.findAll();
+  Future<void> paginate({int? id}) async {
+    bool isLoading = state is CursorPaginationLoading;
+    bool isFetchMore = state is CursorFetchMore;
+    bool isNextPagination = id != null;
+
+    if (isNextPagination && (isLoading || isFetchMore)) {
+      return;
+    }
+
+    if (isNextPagination) {
+      final pState = state as CursorPaginationModel<Memo>;
+      state = CursorFetchMore(metaData: pState.metaData, datas: pState.datas);
+    }
+
+    final datas = await _memoRepository.findAll(id: id, take: 10);
+    logger.d(datas);
+
+    if (state is CursorFetchMore) {
+      final pState = state as CursorPaginationModel<Memo>;
+      state = CursorFetchMore(
+        metaData: pState.metaData.copyWith(lastId: datas.last.id),
+        datas: [...pState.datas, ...datas],
+      );
+    } else {
+      state = CursorPaginationModel(
+        metaData: MetaData(lastId: datas.last.id),
+        datas: datas,
+      );
+    }
   }
 
   //Update
-  Future<Memo> update({required int id, String? title, String? content}) async {
+  Future<void> update({required int id, String? title, String? content}) async {
     final Memo? findMemo = await _memoRepository.findById(id: id);
     if (findMemo == null) {
       throw Exception('not exist Memo');
     }
 
     final updatedMemo = findMemo.copyWith(title: title, content: content);
-    final pState = state;
-    state = pState.map((memo) => memo.id == id ? updatedMemo : memo).toList();
+    final pState = state as CursorPaginationModel<Memo>;
+    state = pState.copyWith(
+      datas:
+          pState.datas
+              .map((memo) => memo.id == id ? updatedMemo : memo)
+              .toList(),
+    );
 
     await _memoRepository.update(id: id, memo: updatedMemo);
-
-    return updatedMemo;
   }
 
   // Create
-  Future<Memo> create({required String title, required String content}) async {
+  Future<void> create({required String title, required String content}) async {
     final Memo memo = await _memoRepository.create(
       title: title,
       content: content,
     );
 
-    final pState = state;
+    final pState = state as CursorPaginationModel<Memo>;
 
-    state = [...pState, memo];
-
-    logger.d(state);
-    return memo;
+    state = pState.copyWith(datas: [...pState.datas, memo]);
   }
 
   //Delete
@@ -59,9 +86,9 @@ class MemoService extends _$MemoService {
     if (findMemo == null) {
       throw Exception('not exist Memo');
     }
-    final pState = state;
-    pState.removeWhere((e) => e.id == id);
-    state = [...pState];
+    final pState = state as CursorPaginationModel<Memo>;
+    pState.datas.removeWhere((e) => e.id == id);
+    state = pState.copyWith(datas: pState.datas);
 
     await _memoRepository.delete(id: id);
 
