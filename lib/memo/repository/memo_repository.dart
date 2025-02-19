@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
+import 'package:my_drift_train/common/logger.dart';
 import 'package:my_drift_train/database/database_connector.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -26,15 +30,23 @@ class MemoRepository {
       ..where((tbl) => tbl.id.equals(id))).getSingle();
   }
 
-  Future<List<Memo>> findAll({int? id, int take = 10}) async {
+  Future<CursorPaginationModel<Memo>> findAll({int? id, int take = 10}) async {
     final query = dataBaseConnector.select(dataBaseConnector.memos);
     if (id != null) {
       query.where((memo) => memo.id.isBiggerThanValue(id));
     }
 
     query.limit(take);
+    final List<Memo> datas = await query.get();
 
-    return query.get();
+    logger.d('-----------');
+    logger.d(datas);
+    logger.d('-----------');
+
+    return CursorPaginationModel(
+      metaData: MetaData(lastId: datas.isNotEmpty ? datas.last.id : null),
+      datas: datas,
+    );
   }
 
   Future<int> delete({required int id}) async {

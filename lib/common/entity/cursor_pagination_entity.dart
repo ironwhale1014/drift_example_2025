@@ -27,7 +27,7 @@ class CursorFetchMore<T> extends CursorPaginationModel<T> {
 }
 
 class MetaData {
-  final int lastId;
+  final int? lastId;
 
   MetaData({required this.lastId});
 

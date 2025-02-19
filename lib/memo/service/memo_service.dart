@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
 import 'package:my_drift_train/common/logger.dart';
 import 'package:my_drift_train/memo/repository/memo_repository.dart';
@@ -18,34 +20,35 @@ class MemoService extends _$MemoService {
   }
 
   // Read
-  Future<void> paginate({int? id}) async {
+  Future<void> paginate({bool isNextPagination = false}) async {
     bool isLoading = state is CursorPaginationLoading;
     bool isFetchMore = state is CursorFetchMore;
-    bool isNextPagination = id != null;
+
+    int? lastId;
 
     if (isNextPagination && (isLoading || isFetchMore)) {
       return;
     }
+    logger.d("hey");
+    logger.d(isNextPagination);
 
     if (isNextPagination) {
+      logger.d("isNextPagination");
       final pState = state as CursorPaginationModel<Memo>;
       state = CursorFetchMore(metaData: pState.metaData, datas: pState.datas);
+      lastId = pState.metaData.lastId;
     }
 
-    final datas = await _memoRepository.findAll(id: id, take: 10);
-    logger.d(datas);
+    final resp = await _memoRepository.findAll(id: lastId, take: 10);
 
     if (state is CursorFetchMore) {
       final pState = state as CursorPaginationModel<Memo>;
       state = CursorFetchMore(
-        metaData: pState.metaData.copyWith(lastId: datas.last.id),
-        datas: [...pState.datas, ...datas],
+        metaData: pState.metaData.copyWith(lastId: resp.datas.last.id),
+        datas: [...pState.datas, ...resp.datas],
       );
     } else {
-      state = CursorPaginationModel(
-        metaData: MetaData(lastId: datas.last.id),
-        datas: datas,
-      );
+      state = resp;
     }
   }
 
