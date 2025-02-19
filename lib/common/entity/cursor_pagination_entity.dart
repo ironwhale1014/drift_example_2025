@@ -28,10 +28,14 @@ class CursorFetchMore<T> extends CursorPaginationModel<T> {
 
 class MetaData {
   final int? lastId;
+  final bool hasMore;
 
-  MetaData({required this.lastId});
+  MetaData({required this.lastId, required this.hasMore});
 
-  MetaData copyWith({int? lastId}) {
-    return MetaData(lastId: lastId ?? this.lastId);
+  MetaData copyWith({int? lastId, bool? hasMore}) {
+    return MetaData(
+      lastId: lastId ?? this.lastId,
+      hasMore: hasMore ?? this.hasMore,
+    );
   }
 }

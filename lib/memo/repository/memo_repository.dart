@@ -31,6 +31,7 @@ class MemoRepository {
   }
 
   Future<CursorPaginationModel<Memo>> findAll({int? id, int take = 10}) async {
+    bool hasMore = true;
     final query = dataBaseConnector.select(dataBaseConnector.memos);
     if (id != null) {
       query.where((memo) => memo.id.isBiggerThanValue(id));
@@ -39,12 +40,15 @@ class MemoRepository {
     query.limit(take);
     final List<Memo> datas = await query.get();
 
-    logger.d('-----------');
-    logger.d(datas);
-    logger.d('-----------');
+    if (datas.length < take) {
+      hasMore = false;
+    }
 
     return CursorPaginationModel(
-      metaData: MetaData(lastId: datas.isNotEmpty ? datas.last.id : null),
+      metaData: MetaData(
+        lastId: datas.isNotEmpty ? datas.last.id : null,
+        hasMore: hasMore,
+      ),
       datas: datas,
     );
   }

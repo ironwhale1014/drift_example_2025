@@ -29,8 +29,13 @@ class MemoService extends _$MemoService {
     if (isNextPagination && (isLoading || isFetchMore)) {
       return;
     }
-    logger.d("hey");
-    logger.d(isNextPagination);
+
+    if (state is CursorPaginationModel) {
+      final pState = state as CursorPaginationModel;
+      if (!pState.metaData.hasMore) {
+        return;
+      }
+    }
 
     if (isNextPagination) {
       logger.d("isNextPagination");
@@ -42,11 +47,8 @@ class MemoService extends _$MemoService {
     final resp = await _memoRepository.findAll(id: lastId, take: 10);
 
     if (state is CursorFetchMore) {
-      final pState = state as CursorPaginationModel<Memo>;
-      state = CursorFetchMore(
-        metaData: pState.metaData.copyWith(lastId: resp.datas.last.id),
-        datas: [...pState.datas, ...resp.datas],
-      );
+      final pState = state as CursorFetchMore<Memo>;
+      state = resp.copyWith(datas: [...pState.datas, ...resp.datas]);
     } else {
       state = resp;
     }
@@ -63,9 +65,9 @@ class MemoService extends _$MemoService {
     final pState = state as CursorPaginationModel<Memo>;
     state = pState.copyWith(
       datas:
-          pState.datas
-              .map((memo) => memo.id == id ? updatedMemo : memo)
-              .toList(),
+      pState.datas
+          .map((memo) => memo.id == id ? updatedMemo : memo)
+          .toList(),
     );
 
     await _memoRepository.update(id: id, memo: updatedMemo);

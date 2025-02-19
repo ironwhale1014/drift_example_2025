@@ -35,11 +35,9 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
   }
 
   void listener() {
-    logger.d(_scrollController.offset);
     if (_scrollController.offset >
         _scrollController.position.maxScrollExtent - 300) {
       ref.read(memoServiceProvider.notifier).paginate(isNextPagination: true);
-      logger.d('ddd');
     }
   }
 
