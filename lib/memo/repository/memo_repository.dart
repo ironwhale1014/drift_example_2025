@@ -8,7 +8,7 @@ part 'memo_repository.g.dart';
 
 @Riverpod(keepAlive: true)
 MemoRepository memoRepository(Ref ref) {
-  final dataBaseConnector = ref.read(databaseConnectorProvider);
+  final DataBaseConnector dataBaseConnector = ref.read(databaseConnectorProvider);
 
   return MemoRepository(dataBaseConnector: dataBaseConnector);
 }
@@ -57,7 +57,7 @@ class MemoRepository {
       ..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Future<Memo> update({required int id, required Memo memo}) {
+  Future<Memo> update({required int id, required MemosCompanion memo}) {
     (dataBaseConnector.update(dataBaseConnector.memos)
       ..where((tbl) => tbl.id.equals(id))).write(memo);
 

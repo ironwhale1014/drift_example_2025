@@ -24,12 +24,8 @@ class DataBaseConnector extends _$DataBaseConnector {
   int get schemaVersion => 1;
 
   static LazyDatabase _openConnection() {
-    print("start app");
     return LazyDatabase(() async {
       final folder = await getApplicationDocumentsDirectory();
-      print("----------");
-      print(folder);
-      print("----------");
       final file = File(p.join(folder.path, 'sqlite/my_db.db'));
 
       return NativeDatabase.createInBackground(file);

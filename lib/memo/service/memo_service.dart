@@ -1,5 +1,4 @@
-import 'dart:math';
-
+import 'package:drift/drift.dart';
 import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
 import 'package:my_drift_train/common/logger.dart';
 import 'package:my_drift_train/memo/repository/memo_repository.dart';
@@ -54,23 +53,32 @@ class MemoService extends _$MemoService {
     }
   }
 
-  //Update
   Future<void> update({required int id, String? title, String? content}) async {
     final Memo? findMemo = await _memoRepository.findById(id: id);
     if (findMemo == null) {
       throw Exception('not exist Memo');
     }
 
-    final updatedMemo = findMemo.copyWith(title: title, content: content);
-    final pState = state as CursorPaginationModel<Memo>;
-    state = pState.copyWith(
-      datas:
-      pState.datas
-          .map((memo) => memo.id == id ? updatedMemo : memo)
-          .toList(),
+    await _memoRepository.update(
+      id: id,
+      memo: MemosCompanion(
+        title: title != null ? Value(title) : const Value.absent(),
+        content: content != null ? Value(content) : const Value.absent(),
+      ),
     );
 
-    await _memoRepository.update(id: id, memo: updatedMemo);
+    // 기존 state가 CursorPaginationModel<Memo> 인지 체크 후 업데이트
+    if (state is CursorPaginationModel<Memo>) {
+      final pState = state as CursorPaginationModel<Memo>;
+
+      state = pState.copyWith(
+        datas: List.from(pState.datas.map(
+              (memo) => memo.id == id
+              ? memo.copyWith(title: title, content: content)
+              : memo,
+        )),
+      );
+    }
   }
 
   // Create

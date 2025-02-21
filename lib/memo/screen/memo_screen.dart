@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
 import 'package:my_drift_train/common/layout/default_layout.dart';
-import 'package:my_drift_train/common/logger.dart';
 import 'package:my_drift_train/database/database_connector.dart';
 import 'package:my_drift_train/memo/service/memo_service.dart';
 
@@ -90,7 +87,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
             onTap: () {
               ref
                   .read(memoServiceProvider.notifier)
-                  .update(id: memo.id, title: "update");
+                  .update(id: memo.id, content: "update!!!");
             },
             onDoubleTap: () {
               ref.read(memoServiceProvider.notifier).delete(id: memo.id);
