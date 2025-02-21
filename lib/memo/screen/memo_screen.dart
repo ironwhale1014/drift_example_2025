@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
 import 'package:my_drift_train/common/layout/default_layout.dart';
 import 'package:my_drift_train/database/database_connector.dart';
+import 'package:my_drift_train/memo/screen/edit_memo_screen.dart';
 import 'package:my_drift_train/memo/service/memo_service.dart';
 
 class MemoScreen extends ConsumerStatefulWidget {
   const MemoScreen({super.key});
+
+  static String get routeName => 'MemoScreen';
 
   @override
   ConsumerState createState() => _MemoScreenState();
@@ -63,9 +67,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
       title: "memo Screen",
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          ref
-              .read(memoServiceProvider.notifier)
-              .create(title: 'test!!!!!!!!', content: 'test');
+          context.goNamed(EditMemoScreen.routeName);
         },
         child: Icon(Icons.add),
       ),
@@ -85,9 +87,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
           Memo memo = pState.datas[index];
           return InkWell(
             onTap: () {
-              ref
-                  .read(memoServiceProvider.notifier)
-                  .update(id: memo.id, content: "update!!!");
+              context.goNamed(EditMemoScreen.routeName, extra: memo);
             },
             onDoubleTap: () {
               ref.read(memoServiceProvider.notifier).delete(id: memo.id);
