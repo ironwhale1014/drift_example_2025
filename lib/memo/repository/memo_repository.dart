@@ -4,11 +4,15 @@ import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
 import 'package:my_drift_train/database/database_connector.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../common/logger.dart';
+
 part 'memo_repository.g.dart';
 
 @Riverpod(keepAlive: true)
 MemoRepository memoRepository(Ref ref) {
-  final DataBaseConnector dataBaseConnector = ref.read(databaseConnectorProvider);
+  final DataBaseConnector dataBaseConnector = ref.read(
+    databaseConnectorProvider,
+  );
 
   return MemoRepository(dataBaseConnector: dataBaseConnector);
 }
@@ -28,6 +32,8 @@ class MemoRepository {
   }
 
   Future<CursorPaginationModel<Memo>> findAll({int? id, int take = 10}) async {
+    logger.d("findAll");
+
     bool hasMore = true;
     int? lastId;
     final query = dataBaseConnector.select(dataBaseConnector.memos);

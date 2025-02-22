@@ -7,6 +7,8 @@ import 'package:my_drift_train/database/database_connector.dart';
 import 'package:my_drift_train/memo/screen/edit_memo_screen.dart';
 import 'package:my_drift_train/memo/service/memo_service.dart';
 
+import '../../common/logger.dart';
+
 class MemoScreen extends ConsumerStatefulWidget {
   const MemoScreen({super.key});
 
@@ -50,11 +52,7 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
       return DefaultLayout(
         title: "memo Screen",
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            ref
-                .read(memoServiceProvider.notifier)
-                .create(title: 'test!!!!!!!!', content: 'test');
-          },
+          onPressed: () {},
           child: Icon(Icons.add),
         ),
         child: Center(child: CircularProgressIndicator()),
@@ -67,38 +65,46 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
       title: "memo Screen",
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.goNamed(EditMemoScreen.routeName);
+          context.pushNamed(EditMemoScreen.routeName).then((value) {
+            ref.read(memoServiceProvider.notifier).paginate(isRefresh: true);
+          });
         },
         child: Icon(Icons.add),
       ),
-      child: ListView.builder(
-        controller: _scrollController,
-        itemCount: pState.datas.length + 1,
-        itemBuilder: (BuildContext context, int index) {
-          if (pState.datas.length == index) {
-            return Center(
-              child:
-                  state is CursorFetchMore
-                      ? CircularProgressIndicator()
-                      : Text("마지막 입니다."),
-            );
-          }
-
-          Memo memo = pState.datas[index];
-          return InkWell(
-            onTap: () {
-              context.goNamed(EditMemoScreen.routeName, extra: memo);
-            },
-            onDoubleTap: () {
-              ref.read(memoServiceProvider.notifier).delete(id: memo.id);
-            },
-            child: ListTile(
-              title: Text('${memo.id}: ${memo.title}'),
-              subtitle: Text(memo.content),
-              // leading: Text(memo.content),
-            ),
-          );
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.read(memoServiceProvider.notifier).paginate(isRefresh: true);
         },
+        child: ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
+          controller: _scrollController,
+          itemCount: pState.datas.length + 1,
+          itemBuilder: (BuildContext context, int index) {
+            if (pState.datas.length == index) {
+              return Center(
+                child:
+                    state is CursorFetchMore
+                        ? CircularProgressIndicator()
+                        : Text("마지막 입니다."),
+              );
+            }
+
+            Memo memo = pState.datas[index];
+            return InkWell(
+              onTap: () {
+                context.goNamed(EditMemoScreen.routeName, extra: memo);
+              },
+              onDoubleTap: () {
+                ref.read(memoServiceProvider.notifier).delete(id: memo.id);
+              },
+              child: ListTile(
+                title: Text('${memo.id}: ${memo.title}'),
+                subtitle: Text(memo.content),
+                // leading: Text(memo.content),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
