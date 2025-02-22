@@ -59,17 +59,17 @@ class EditMemoScreen extends ConsumerWidget {
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     if (memo == null) {
-                      ref
+                      await ref
                           .read(memoServiceProvider.notifier)
                           .create(
                             title: _titleController.text,
                             content: _contentController.text,
                           );
                     } else {
-                      ref
+                      await ref
                           .read(memoServiceProvider.notifier)
                           .update(
                             id: memo!.id,

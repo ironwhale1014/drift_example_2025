@@ -19,31 +19,51 @@ class MemoService extends _$MemoService {
   }
 
   // Read
-  Future<void> paginate({bool isNextPagination = false}) async {
+  Future<void> paginate({
+    bool isNextPagination = false,
+    bool isRefresh = false,
+  }) async {
+    // paginate 메소드가 실행 되야하는 상황
+    // 처음 데이터를 받아올때 = 새로 고침 할때
+    // 다음 데이터를 받아올때
+
+    // 실행되면 안되는 상황
+    // 데이터를 받아오는 중일때
+    // 다음 데이터가 없을때
+
     bool isLoading = state is CursorPaginationLoading;
     bool isFetchMore = state is CursorFetchMore;
 
+    // lastId가 null 처음 시작할때 또는 강제로 새로고침
     int? lastId;
 
-    if (isNextPagination && (isLoading || isFetchMore)) {
-      return;
-    }
-
-    if (state is CursorPaginationModel) {
+    //&& !isRefresh 없으면 데이터가 있는 CursorPaginationModel 상태에서 강제 새로 고침이 작동 안함
+    if (state is CursorPaginationModel && !isRefresh) {
       final pState = state as CursorPaginationModel;
       if (!pState.metaData.hasMore) {
         return;
       }
     }
 
+    // (isNextPagination || isRefresh)은 없으면 데이터를 받아오는 로직으로 안넘어가고 로딩만 돌듯
+    if ((isNextPagination || isRefresh) && (isLoading || isFetchMore)) {
+      return;
+    }
+
     if (isNextPagination) {
-      logger.d("isNextPagination");
       final pState = state as CursorPaginationModel<Memo>;
       state = CursorFetchMore(metaData: pState.metaData, datas: pState.datas);
       lastId = pState.metaData.lastId;
     }
 
-    final resp = await _memoRepository.findAll(id: lastId, take: 10);
+    if (isRefresh) {
+      state = CursorPaginationLoading();
+    }
+
+    final CursorPaginationModel<Memo> resp = await _memoRepository.findAll(
+      id: lastId,
+      take: 10,
+    );
 
     if (state is CursorFetchMore) {
       final pState = state as CursorFetchMore<Memo>;
@@ -67,30 +87,23 @@ class MemoService extends _$MemoService {
       ),
     );
 
-    // 기존 state가 CursorPaginationModel<Memo> 인지 체크 후 업데이트
-    if (state is CursorPaginationModel<Memo>) {
-      final pState = state as CursorPaginationModel<Memo>;
+    final pState = state as CursorPaginationModel<Memo>;
 
-      state = pState.copyWith(
-        datas: List.from(pState.datas.map(
-              (memo) => memo.id == id
-              ? memo.copyWith(title: title, content: content)
-              : memo,
-        )),
-      );
-    }
+    state = pState.copyWith(
+      datas: List.from(
+        pState.datas.map(
+          (memo) =>
+              memo.id == id
+                  ? memo.copyWith(title: title, content: content)
+                  : memo,
+        ),
+      ),
+    );
   }
 
   // Create
   Future<void> create({required String title, required String content}) async {
-    final Memo memo = await _memoRepository.create(
-      title: title,
-      content: content,
-    );
-
-    final pState = state as CursorPaginationModel<Memo>;
-
-    state = pState.copyWith(datas: [...pState.datas, memo]);
+    await _memoRepository.create(title: title, content: content);
   }
 
   //Delete
