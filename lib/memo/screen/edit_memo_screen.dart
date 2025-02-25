@@ -39,10 +39,6 @@ class EditMemoScreen extends ConsumerWidget {
                     return 'write title';
                   }
 
-                  if (value.length < 6) {
-                    return 'Must at least be 6 characters long';
-                  }
-
                   return null;
                 },
               ),
@@ -77,7 +73,6 @@ class EditMemoScreen extends ConsumerWidget {
                             content: _contentController.text,
                           );
                     }
-
                     context.pop();
                   }
                 },

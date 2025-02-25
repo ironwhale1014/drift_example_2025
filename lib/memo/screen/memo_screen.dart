@@ -4,10 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
 import 'package:my_drift_train/common/layout/default_layout.dart';
 import 'package:my_drift_train/database/database_connector.dart';
+import 'package:my_drift_train/excel/get_excel_provider.dart';
 import 'package:my_drift_train/memo/screen/edit_memo_screen.dart';
 import 'package:my_drift_train/memo/service/memo_service.dart';
-
-import '../../common/logger.dart';
 
 class MemoScreen extends ConsumerStatefulWidget {
   const MemoScreen({super.key});
@@ -44,6 +43,10 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
     }
   }
 
+  Future<void> saveMemoFromExcel() async {
+    await ref.read(getExcelProvider.notifier).saveMemoFromExcel();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(memoServiceProvider);
@@ -61,8 +64,12 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
 
     final pState = state as CursorPaginationModel<Memo>;
 
+    Size size = MediaQuery.of(context).size;
     return DefaultLayout(
       title: "memo Screen",
+      actions: [
+        MaterialButton(onPressed: saveMemoFromExcel, child: Icon(Icons.add)),
+      ],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           context.pushNamed(EditMemoScreen.routeName).then((value) {
@@ -80,6 +87,13 @@ class _MemoScreenState extends ConsumerState<MemoScreen> {
           controller: _scrollController,
           itemCount: pState.datas.length + 1,
           itemBuilder: (BuildContext context, int index) {
+            if (pState.datas.isEmpty) {
+              return SizedBox(
+                height: size.height-100,
+                child: Center(child: Text('메모가 없습니다.\n메모를 입력 해주세요',style: TextStyle(fontSize: 24),)),
+              );
+            }
+
             if (pState.datas.length == index) {
               return Center(
                 child:

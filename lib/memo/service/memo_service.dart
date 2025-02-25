@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:my_drift_train/common/entity/cursor_pagination_entity.dart';
-import 'package:my_drift_train/common/logger.dart';
 import 'package:my_drift_train/memo/repository/memo_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

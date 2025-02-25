@@ -39,10 +39,6 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
     'title',
     aliasedName,
     false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 6,
-      maxTextLength: 32,
-    ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -51,7 +47,7 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
   );
   @override
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
-    'body',
+    'content',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -88,10 +84,10 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
-    if (data.containsKey('body')) {
+    if (data.containsKey('content')) {
       context.handle(
         _contentMeta,
-        content.isAcceptableOrUnknown(data['body']!, _contentMeta),
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
       );
     } else if (isInserting) {
       context.missing(_contentMeta);
@@ -123,7 +119,7 @@ class $MemosTable extends Memos with TableInfo<$MemosTable, Memo> {
       content:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
-            data['${effectivePrefix}body'],
+            data['${effectivePrefix}content'],
           )!,
     );
   }
@@ -151,7 +147,7 @@ class Memo extends DataClass implements Insertable<Memo> {
     map['id'] = Variable<int>(id);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['title'] = Variable<String>(title);
-    map['body'] = Variable<String>(content);
+    map['content'] = Variable<String>(content);
     return map;
   }
 
@@ -258,7 +254,7 @@ class MemosCompanion extends UpdateCompanion<Memo> {
       if (id != null) 'id': id,
       if (createdAt != null) 'created_at': createdAt,
       if (title != null) 'title': title,
-      if (content != null) 'body': content,
+      if (content != null) 'content': content,
     });
   }
 
@@ -289,7 +285,7 @@ class MemosCompanion extends UpdateCompanion<Memo> {
       map['title'] = Variable<String>(title.value);
     }
     if (content.present) {
-      map['body'] = Variable<String>(content.value);
+      map['content'] = Variable<String>(content.value);
     }
     return map;
   }

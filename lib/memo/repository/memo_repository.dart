@@ -36,6 +36,7 @@ class MemoRepository {
 
     bool hasMore = true;
     int? lastId;
+    logger.d(id);
     final query = dataBaseConnector.select(dataBaseConnector.memos);
     if (id != null) {
       query.where((memo) => memo.id.isBiggerThanValue(id));
